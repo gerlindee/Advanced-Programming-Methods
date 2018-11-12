@@ -11,16 +11,19 @@ public class MyStack<T> implements IStack<T> {
         this.stack = new Stack<>();
     }
 
+    @Override
     public void push(T elem) {
         stack.push(elem);
     }
 
+    @Override
     public T pop() throws EmptyContainerException {
         if(this.stack.isEmpty())
             throw new EmptyContainerException("THE STACK IS EMPTY!");
         return stack.pop();
     }
 
+    @Override
     public boolean isEmpty() {
         return stack.empty();
     }
@@ -31,22 +34,22 @@ public class MyStack<T> implements IStack<T> {
         result.setLength(size);
         if(this.stack.isEmpty()){
             result.append("[ ]");
+            result.append("\n");
             return result.toString();
         }
         int i = this.stack.size() - 1;
-        result.append("[");
         result.append(this.stack.get(i).toString());
+        result.append("\n");
         i--;
         while(i >= 0) {
-            result.append(" | ");
-            if(result.length() > size) {
+            if (result.length() > size) {
                 size = 2 * size;
                 result.setLength(size);
             }
             result.append(this.stack.get(i).toString());
+            result.append("\n");
             i--;
         }
-        result.append("]");
         return result.toString();
 
     }
