@@ -2,9 +2,13 @@ package Controller;
 
 import ADTs.IStack;
 import Exceptions.EmptyContainerException;
+import Exceptions.ExistingFileException;
+import Exceptions.MissingBufferReaderException;
 import Model.ProgramState;
 import Model.Statements.IStatement;
 import Repository.IRepo;
+
+import java.io.IOException;
 
 public class Controller {
     private IRepo repository;
@@ -28,24 +32,32 @@ public class Controller {
         try {
             IStatement currentStmt = stack.pop();
             state = currentStmt.execute(state);
-            if(this.flag.equals("on")) {
-                System.out.println(state.toString());
-            }
         }catch (EmptyContainerException ex) {
             System.out.println(ex.getMessage());
+        }catch (ExistingFileException ex1) {
+            System.out.println(ex1.getMessage());
+        }catch (IOException ex2) {
+            System.out.println(ex2.toString());
+        } catch (MissingBufferReaderException ex3) {
+            System.out.println(ex3.getMessage());
         }
         return state;
     }
 
     public void allStep() {
         ProgramState state = this.repository.getCrtPrg();
-        int step = 0;
-        while(!state.getExeStack().isEmpty()) {
-            System.out.printf("Step: %d \n", step);
-            oneStep(state);
-            step++;
+        try {
+            while (!state.getExeStack().isEmpty()) {
+                oneStep(state);
+                if (this.flag.equals("on")) {
+                    System.out.println(state.toString());
+                }
+                this.repository.logPrgStateExec(state);
+            }
+            System.out.println("\n");
+        } catch (IOException ex) {
+            System.out.println(ex.toString());
         }
-        System.out.println("\n");
     }
 
     public void setFlag(String value) {
