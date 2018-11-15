@@ -1,9 +1,7 @@
 package Controller;
 
 import ADTs.IStack;
-import Exceptions.EmptyContainerException;
-import Exceptions.ExistingFileException;
-import Exceptions.MissingBufferReaderException;
+import Exceptions.*;
 import Model.ProgramState;
 import Model.Statements.IStatement;
 import Repository.IRepo;
@@ -32,21 +30,29 @@ public class Controller {
         try {
             IStatement currentStmt = stack.pop();
             state = currentStmt.execute(state);
-        }catch (EmptyContainerException ex) {
+        } catch (EmptyContainerException ex) {
             System.out.println(ex.getMessage());
-        }catch (ExistingFileException ex1) {
+        } catch (NullPointerException ex7) {
+            System.out.println("Missing file!");
+        } catch (ExistingFileException ex1) {
             System.out.println(ex1.getMessage());
-        }catch (IOException ex2) {
+        } catch (IOException ex2) {
             System.out.println(ex2.toString());
         } catch (MissingBufferReaderException ex3) {
             System.out.println(ex3.getMessage());
+        } catch (UndefinedVariableException ex4) {
+            System.out.println(ex4.getMessage());
+        } catch (DivisionByZeroException ex5) {
+            System.out.println(ex5.getMessage());
+        } catch (UndefinedOperationException ex6) {
+            System.out.println(ex6.getMessage());
         }
         return state;
     }
 
     public void allStep() {
-        ProgramState state = this.repository.getCrtPrg();
         try {
+            ProgramState state = this.repository.getCrtPrg();
             while (!state.getExeStack().isEmpty()) {
                 oneStep(state);
                 if (this.flag.equals("on")) {
@@ -57,6 +63,8 @@ public class Controller {
             System.out.println("\n");
         } catch (IOException ex) {
             System.out.println(ex.toString());
+        } catch (EmptyContainerException ex1) {
+            System.out.println(ex1.getMessage());
         }
     }
 
