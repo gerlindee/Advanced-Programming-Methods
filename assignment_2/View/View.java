@@ -2,8 +2,10 @@ package View;
 
 import ADTs.*;
 import Controller.Controller;
+import Heap.Heap;
 import Model.Expressions.ArithmetricExpression;
 import Model.Expressions.ConstantExpression;
+import Model.Expressions.HeapReadingExpression;
 import Model.Expressions.VarExpression;
 import Model.ProgramState;
 import Model.Statements.*;
@@ -19,6 +21,9 @@ public class View {
         System.out.println("program_3 : a = 2 - 2; (IF a THEN v = 2 ELSE v = 3); Print(v)");
         System.out.println("program_4: open(var_f, \"test_in\"); read(var_f,var_c); Print(var_c); (if var_c then read(var_f,var_c); Print(var_c) else Print(0)); close(var_f)");
         System.out.println("program_5: open(var_f,\"test.in\"); readFile(var_f+2,var_c); Print(var_c); (if var_c then read(var_f,var_c); Print(var_c) eles print(0)); close(var_f);");
+        System.out.println("program_6: v = 10; new(v, 20); new(a, 22); print(v);");
+        System.out.println("program_7: v = 10; new(v,20); print(100+rh(v)); print(100+rh(a));");
+        System.out.println("program_8: v = 10; new(v,20); new(a,22); wH(a,30); print(a); print(rh(a));");
     }
 
     public static void main(String[] args) {
@@ -33,8 +38,9 @@ public class View {
         MyDictionary<String, Integer> symTable1 = new MyDictionary<>();
         MyList<Integer> out1 = new MyList<>();
         MyDictionary<Integer,Tuple<String, BufferedReader>> file1 = new MyDictionary<>();
+        Heap heap1 = new Heap();
 
-        ProgramState prg1 = new ProgramState(stack1,symTable1,out1,statement1,file1);
+        ProgramState prg1 = new ProgramState(stack1,symTable1,out1,statement1,file1, heap1);
 
         Repository repo1 = new Repository("logfile1.txt");
         Controller ctrl1 = new Controller(repo1, "on");
@@ -61,8 +67,9 @@ public class View {
         MyDictionary<String, Integer> symTable2 = new MyDictionary<>();
         MyList<Integer> out2 = new MyList<>();
         MyDictionary<Integer,Tuple<String, BufferedReader>> file2 = new MyDictionary<>();
+        Heap heap2 = new Heap();
 
-        ProgramState prg2 = new ProgramState(stack2, symTable2, out2, comp3, file2);
+        ProgramState prg2 = new ProgramState(stack2, symTable2, out2, comp3, file2, heap2);
 
         Repository repo2 = new Repository("logfile2.txt");
         Controller ctrl2 = new Controller(repo2, "on");
@@ -82,8 +89,9 @@ public class View {
         MyDictionary<String, Integer> symTable3 = new MyDictionary<>();
         MyList<Integer> out3 = new MyList<>();
         MyDictionary<Integer,Tuple<String, BufferedReader>> file3 = new MyDictionary<>();
+        Heap heap3 = new Heap();
 
-        ProgramState prg3 = new ProgramState(stack3, symTable3, out3, comp5, file3);
+        ProgramState prg3 = new ProgramState(stack3, symTable3, out3, comp5, file3, heap3);
 
         Repository repo3 = new Repository("logfile3.txt");
         Controller ctrl3 = new Controller(repo3, "on");
@@ -112,8 +120,9 @@ public class View {
         MyDictionary<String, Integer> symTable4 = new MyDictionary<>();
         MyList<Integer> out4 = new MyList<>();
         MyDictionary<Integer,Tuple<String, BufferedReader>> file4 = new MyDictionary<>();
+        Heap heap4 = new Heap();
 
-        ProgramState prg4 = new ProgramState(stack4, symTable4, out4, comp10, file4);
+        ProgramState prg4 = new ProgramState(stack4, symTable4, out4, comp10, file4, heap4);
 
         Repository repo4 = new Repository("logfile4.txt");
         Controller ctrl4 = new Controller(repo4, "on");
@@ -143,13 +152,97 @@ public class View {
         MyDictionary<String, Integer> symTable5 = new MyDictionary<>();
         MyList<Integer> out5 = new MyList<>();
         MyDictionary<Integer,Tuple<String, BufferedReader>> file5 = new MyDictionary<>();
+        Heap heap5 = new Heap();
 
-        ProgramState prg5 = new ProgramState(stack5, symTable5, out5, comp15, file5);
+        ProgramState prg5 = new ProgramState(stack5, symTable5, out5, comp15, file5, heap5);
 
         Repository repo5 = new Repository("logfile5.txt");
         Controller ctrl5 = new Controller(repo5, "on");
         ctrl5.setFlag("on");
         ctrl5.addProgram(prg5);
+
+        // program_6: v = 10; new(v, 20); new(a, 22); print(v);
+
+        VarExpression varExpression = new VarExpression("v");
+        ConstantExpression constantExpression = new ConstantExpression(20);
+        AssignStatement assignStatement = new AssignStatement("v", new ConstantExpression(10));
+        NewStatement newStatement1 = new NewStatement("v", constantExpression);
+        NewStatement newStatement = new NewStatement("a",new ConstantExpression(22));
+        PrintStatement printStatement = new PrintStatement(varExpression);
+        CompStatement compStatement = new CompStatement(newStatement, printStatement);
+        CompStatement compStatement1 = new CompStatement(newStatement1, compStatement);
+        CompStatement compStatement2 = new CompStatement(assignStatement, compStatement1);
+
+        MyStack<IStatement> stack6 = new MyStack<>();
+        MyDictionary<String, Integer> symTable6 = new MyDictionary<>();
+        MyList<Integer> out6 = new MyList<>();
+        MyDictionary<Integer,Tuple<String, BufferedReader>> file6 = new MyDictionary<>();
+        Heap heap6 = new Heap();
+
+        ProgramState prg6 = new ProgramState(stack6, symTable6, out6, compStatement2, file6, heap6);
+
+        Repository repo6 = new Repository("logfile6.txt");
+        Controller ctrl6 = new Controller(repo6, "on");
+        ctrl6.setFlag("on");
+        ctrl6.addProgram(prg6);
+
+        // program_7: v = 10; new(v,20); print(100+rh(v)); print(100+rh(a));
+
+        AssignStatement assignStatement1 = new AssignStatement("v", new ConstantExpression(10));
+        NewStatement newStatement2 = new NewStatement("v", constantExpression);
+        NewStatement newStatement3 = new NewStatement("a",new ConstantExpression(22));
+        HeapReadingExpression heapReadingExpression = new HeapReadingExpression("v");
+        ArithmetricExpression arithmetricExpression = new ArithmetricExpression(new ConstantExpression(100), heapReadingExpression, "+");
+        PrintStatement printStatement1 = new PrintStatement(arithmetricExpression);
+        HeapReadingExpression heapReadingExpression1 = new HeapReadingExpression("a");
+        ArithmetricExpression arithmetricExpression1 = new ArithmetricExpression(new ConstantExpression(100), heapReadingExpression1, "+");
+        PrintStatement printStatement2 = new PrintStatement(arithmetricExpression1);
+        CompStatement compStatement3 = new CompStatement(printStatement1, printStatement2);
+        CompStatement compStatement4 = new CompStatement(newStatement3, compStatement3);
+        CompStatement compStatement5 = new CompStatement(newStatement2, compStatement4);
+        CompStatement compStatement6 = new CompStatement(assignStatement1, compStatement5);
+
+        MyStack<IStatement> stack7 = new MyStack<>();
+        MyDictionary<String, Integer> symTable7 = new MyDictionary<>();
+        MyList<Integer> out7 = new MyList<>();
+        MyDictionary<Integer,Tuple<String, BufferedReader>> file7 = new MyDictionary<>();
+        Heap heap7 = new Heap();
+
+        ProgramState prg7 = new ProgramState(stack7, symTable7, out7, compStatement6, file7, heap7);
+
+        Repository repo7 = new Repository("logfile7.txt");
+        Controller ctrl7 = new Controller(repo7, "on");
+        ctrl7.setFlag("on");
+        ctrl7.addProgram(prg7);
+
+        // program_8: v = 10; new(v,20); new(a,22); wH(a,30); print(a); print(rh(a));
+
+        VarExpression varExpression1 = new VarExpression("a");
+        AssignStatement assignStatement2 = new AssignStatement("v", new ConstantExpression(10));
+        NewStatement newStatement4 = new NewStatement("v", new ConstantExpression(20));
+        NewStatement newStatement5 = new NewStatement("a",new ConstantExpression(22));
+        HeapWritingStatement heapWritingStatement = new HeapWritingStatement("a", new ConstantExpression(30));
+        PrintStatement printStatement3 = new PrintStatement(varExpression1);
+        HeapReadingExpression heapReadingExpression2 = new HeapReadingExpression("a");
+        PrintStatement printStatement4 = new PrintStatement(heapReadingExpression2);
+        CompStatement compStatement7 = new CompStatement(printStatement3, printStatement4);
+        CompStatement compStatement8 = new CompStatement(heapWritingStatement, compStatement7);
+        CompStatement compStatement9 = new CompStatement(newStatement5, compStatement8);
+        CompStatement compStatement10 = new CompStatement(newStatement4, compStatement9);
+        CompStatement compStatement11 = new CompStatement(assignStatement2, compStatement10);
+
+        MyStack<IStatement> stack8 = new MyStack<>();
+        MyDictionary<String, Integer> symTable8 = new MyDictionary<>();
+        MyList<Integer> out8 = new MyList<>();
+        MyDictionary<Integer,Tuple<String, BufferedReader>> file8 = new MyDictionary<>();
+        Heap heap8 = new Heap();
+
+        ProgramState prg8 = new ProgramState(stack8, symTable8, out8, compStatement11, file8, heap8);
+
+        Repository repo8 = new Repository("logfile8.txt");
+        Controller ctrl8 = new Controller(repo8, "on");
+        ctrl8.setFlag("on");
+        ctrl8.addProgram(prg8);
 
         TextMenu menu = new TextMenu();
         menu.addCommand(new ExitCommand("0", "exit"));
@@ -158,6 +251,10 @@ public class View {
         menu.addCommand(new RunExample("3", "program_3", ctrl3));
         menu.addCommand(new RunExample("4", "program_4", ctrl4));
         menu.addCommand(new RunExample("5","program_5", ctrl5));
+        menu.addCommand(new RunExample("6","program_6", ctrl6));
+        menu.addCommand(new RunExample("7", "program_7", ctrl7));
+        menu.addCommand(new RunExample("8", "program_8", ctrl8));
+
         display();
         menu.show();
 
