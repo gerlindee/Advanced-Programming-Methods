@@ -2,6 +2,7 @@ package Controller;
 
 import ADTs.IStack;
 import Exceptions.*;
+import Heap.Heap;
 import Model.ProgramState;
 import Model.Statements.IStatement;
 import Repository.IRepo;
@@ -46,6 +47,8 @@ public class Controller {
             System.out.println(ex5.getMessage());
         } catch (UndefinedOperationException ex6) {
             System.out.println(ex6.getMessage());
+        } catch (HeapReadingException ex7) {
+            System.out.println(ex7.getMessage());
         }
         return state;
     }
