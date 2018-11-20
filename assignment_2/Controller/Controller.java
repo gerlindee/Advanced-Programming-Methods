@@ -2,12 +2,17 @@ package Controller;
 
 import ADTs.IStack;
 import Exceptions.*;
-import Heap.Heap;
+
 import Model.ProgramState;
 import Model.Statements.IStatement;
 import Repository.IRepo;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 public class Controller {
     private IRepo repository;
@@ -16,6 +21,10 @@ public class Controller {
     public Controller(IRepo repo, String flag) {
         this.repository = repo;
         this.setFlag(flag);
+    }
+
+    private Map<Integer,Integer> garbageCollector(Collection<Integer> symTableValues, Map<Integer, Integer> heap) {
+        return heap.entrySet().stream().filter(e->symTableValues.contains(e.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public boolean isEmpty() {
@@ -58,6 +67,7 @@ public class Controller {
             ProgramState state = this.repository.getCrtPrg();
             while (!state.getExeStack().isEmpty()) {
                 oneStep(state);
+                state.getHeap().setDictionary((HashMap<Integer, Integer>)this.garbageCollector(state.getSymTable().values(),state.getHeap().getDictionary()));
                 if (this.flag.equals("on")) {
                     System.out.println(state.toString());
                 }
