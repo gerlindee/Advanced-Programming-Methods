@@ -21,8 +21,8 @@ public class MyDictionary<K,V> implements IDictionary<K,V> {
     }
 
     @Override
-    public V remove(K key) {
-        return this.dictionary.remove(key);
+    public void remove(K key) {
+        this.dictionary.remove(key);
     }
 
     public Collection<V> values() {
@@ -32,6 +32,15 @@ public class MyDictionary<K,V> implements IDictionary<K,V> {
     public Collection<K> keys() {
         return this.dictionary.keySet();
     }
+
+    public HashMap<K,V> getDictionary() {
+        return this.dictionary;
+    }
+
+    public void setContent(HashMap<K,V> content) {
+        this.dictionary = content;
+    }
+
 
     public String toString() {
         StringBuilder result = new StringBuilder();
