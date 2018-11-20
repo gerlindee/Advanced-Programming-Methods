@@ -5,6 +5,7 @@ import ADTs.MyDictionary;
 import Exceptions.HeapReadingException;
 
 import java.util.Collection;
+import java.util.HashMap;
 
 public class Heap implements IHeap {
     private IDictionary<Integer, Integer> mappings;
@@ -52,4 +53,13 @@ public class Heap implements IHeap {
     public String toString() {
         return this.mappings.toString();
     }
+
+    public HashMap<Integer, Integer> getDictionary() {
+        return this.mappings.getDictionary();
+    }
+
+    public void setDictionary(HashMap<Integer,Integer> content) {
+        this.mappings.setContent(content);
+    }
+
 }
