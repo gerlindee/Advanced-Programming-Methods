@@ -23,7 +23,7 @@ public class View {
         System.out.println("program_5: open(var_f,\"test.in\"); readFile(var_f+2,var_c); Print(var_c); (if var_c then read(var_f,var_c); Print(var_c) eles print(0)); close(var_f);");
         System.out.println("program_6: v = 10; new(v, 20); new(a, 22); print(v);");
         System.out.println("program_7: v = 10; new(v,20); print(100+rh(v)); print(100+rh(a));");
-        System.out.println("program_8: v = 10; new(v,20); new(a,22); wH(a,30); print(a); print(rh(a));");
+        System.out.println("program_8: v = 10; new(v,20); new(a,22); wH(a,30); print(a); print(rh(a)); a = 0;");
     }
 
     public static void main(String[] args) {
@@ -215,7 +215,7 @@ public class View {
         ctrl7.setFlag("on");
         ctrl7.addProgram(prg7);
 
-        // program_8: v = 10; new(v,20); new(a,22); wH(a,30); print(a); print(rh(a));
+        // program_8: v = 10; new(v,20); new(a,22); wH(a,30); print(a); print(rh(a)); a = 0;
 
         VarExpression varExpression1 = new VarExpression("a");
         AssignStatement assignStatement2 = new AssignStatement("v", new ConstantExpression(10));
@@ -225,11 +225,14 @@ public class View {
         PrintStatement printStatement3 = new PrintStatement(varExpression1);
         HeapReadingExpression heapReadingExpression2 = new HeapReadingExpression("a");
         PrintStatement printStatement4 = new PrintStatement(heapReadingExpression2);
-        CompStatement compStatement7 = new CompStatement(printStatement3, printStatement4);
-        CompStatement compStatement8 = new CompStatement(heapWritingStatement, compStatement7);
-        CompStatement compStatement9 = new CompStatement(newStatement5, compStatement8);
-        CompStatement compStatement10 = new CompStatement(newStatement4, compStatement9);
-        CompStatement compStatement11 = new CompStatement(assignStatement2, compStatement10);
+        AssignStatement assignStatement3 = new AssignStatement("a", new ConstantExpression(0));
+        CompStatement compStatement7 = new CompStatement(printStatement4, assignStatement3);
+        CompStatement compStatement8 = new CompStatement(printStatement3, compStatement7);
+        CompStatement compStatement9 = new CompStatement(heapWritingStatement, compStatement8);
+        CompStatement compStatement10 = new CompStatement(newStatement5, compStatement9);
+        CompStatement compStatement11 = new CompStatement(newStatement4, compStatement10);
+        CompStatement compStatement12 = new CompStatement(assignStatement2, compStatement11);
+
 
         MyStack<IStatement> stack8 = new MyStack<>();
         MyDictionary<String, Integer> symTable8 = new MyDictionary<>();
@@ -237,7 +240,7 @@ public class View {
         MyDictionary<Integer,Tuple<String, BufferedReader>> file8 = new MyDictionary<>();
         Heap heap8 = new Heap();
 
-        ProgramState prg8 = new ProgramState(stack8, symTable8, out8, compStatement11, file8, heap8);
+        ProgramState prg8 = new ProgramState(stack8, symTable8, out8, compStatement12, file8, heap8);
 
         Repository repo8 = new Repository("logfile8.txt");
         Controller ctrl8 = new Controller(repo8, "on");
