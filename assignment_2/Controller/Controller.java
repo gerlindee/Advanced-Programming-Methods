@@ -1,15 +1,21 @@
 package Controller;
 
+import ADTs.IDictionary;
 import ADTs.IStack;
+import ADTs.Tuple;
 import Exceptions.*;
 
+import Model.Expressions.VarExpression;
 import Model.ProgramState;
+import Model.Statements.CloseRFile;
 import Model.Statements.IStatement;
 import Repository.IRepo;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -62,20 +68,35 @@ public class Controller {
         return state;
     }
 
-    public void allStep() {
+    public void allStep() throws UndefinedVariableException, DivisionByZeroException, UndefinedOperationException, HeapReadingException, IOException{
         try {
             ProgramState state = this.repository.getCrtPrg();
-            while (!state.getExeStack().isEmpty()) {
-                oneStep(state);
-                state.getHeap().setDictionary((HashMap<Integer, Integer>)this.garbageCollector(state.getSymTable().values(),state.getHeap().getDictionary()));
+            try {
+                while (!state.getExeStack().isEmpty()) {
+                    oneStep(state);
+                    state.getHeap().setDictionary((HashMap<Integer, Integer>) this.garbageCollector(state.getSymTable().values(), state.getHeap().getDictionary()));
+                    if (this.flag.equals("on")) {
+                        System.out.println(state.toString());
+                    }
+                    this.repository.logPrgStateExec(state);
+                }
+                System.out.println("\n");
+            } catch (IOException ex) {
+                System.out.println(ex.toString());
+            } finally {
+                Collection<Integer> fileTableKeys = state.getFileTable().keys();
+                IDictionary<String, Integer> symTable = state.getSymTable();
+                IDictionary<Integer, Tuple<String, BufferedReader>> fileTable = state.getFileTable();
+                List<Map.Entry<String, Integer>> keys = symTable.getDictionary().entrySet().stream().filter(file->fileTableKeys.contains(file.getValue())).collect(Collectors.toList());
+                for(Map.Entry<String, Integer> entry : keys) {
+                    if(fileTable.containsKey(entry.getValue()))
+                        new CloseRFile(new VarExpression(entry.getKey())).execute(state);
+                }
                 if (this.flag.equals("on")) {
                     System.out.println(state.toString());
                 }
                 this.repository.logPrgStateExec(state);
             }
-            System.out.println("\n");
-        } catch (IOException ex) {
-            System.out.println(ex.toString());
         } catch (EmptyContainerException ex1) {
             System.out.println(ex1.getMessage());
         }
