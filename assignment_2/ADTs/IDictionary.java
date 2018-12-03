@@ -11,5 +11,5 @@ public interface IDictionary<K,V> {
     Collection<K> keys();
     String toString();
     HashMap<K,V> getDictionary();
-    void setContent(HashMap<K,V> content);
+    boolean containsKey(K key);
 }
