@@ -37,10 +37,9 @@ public class MyDictionary<K,V> implements IDictionary<K,V> {
         return this.dictionary;
     }
 
-    public void setContent(HashMap<K,V> content) {
-        this.dictionary = content;
+    public boolean containsKey(K key) {
+        return this.dictionary.containsKey(key);
     }
-
 
     public String toString() {
         StringBuilder result = new StringBuilder();
