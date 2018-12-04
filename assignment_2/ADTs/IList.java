@@ -8,6 +8,4 @@ public interface IList<T> {
     boolean isEmpty();
     T remove() throws EmptyContainerException;
     String toString();
-    T get(int index);
-    T getFirst();
 }
