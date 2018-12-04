@@ -9,13 +9,11 @@ public class MyDictionary<K,V> implements IDictionary<K,V> {
     public MyDictionary() {
         this.dictionary = new HashMap<>();
     }
-
-    @Override
+    
     public void put(K key, V value) {
         this.dictionary.put(key, value);
     }
 
-    @Override
     public V get(K key) {
         return this.dictionary.get(key);
     }
