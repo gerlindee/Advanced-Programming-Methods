@@ -11,31 +11,18 @@ public class MyList<T> implements IList<T> {
         this.list = new LinkedList<>();
     }
 
-    @Override
     public void addFirst(T elem) {
         this.list.addFirst(elem);
     }
-
-    @Override
+    
     public boolean isEmpty() {
         return this.list.isEmpty();
     }
 
-    @Override
     public T remove() throws EmptyContainerException {
         if(this.isEmpty())
-            throw new EmptyContainerException("THE LIST IS EMPTY!");
+            throw new EmptyContainerException();
         return this.list.remove();
-    }
-
-    @Override
-    public T get(int index) {
-        return this.list.get(index);
-    }
-
-    @Override
-    public T getFirst() {
-        return this.list.getFirst();
     }
 
     public String toString() {
