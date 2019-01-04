@@ -6,6 +6,8 @@ import Exceptions.DivisionByZeroException;
 import Exceptions.HeapReadingException;
 import Exceptions.UndefinedOperationException;
 import Exceptions.UndefinedVariableException;
+import Heap.Heap;
+import Heap.IHeap;
 import Model.Expressions.VarExpression;
 import Model.ProgramState;
 import Model.Statements.CloseRFile;
@@ -30,8 +32,26 @@ public class Controller {
         this.setFlag(flag);
     }
 
-    private Map<Integer,Integer> garbageCollector(Collection<Integer> symTableValues, Map<Integer, Integer> heap) {
-        return heap.entrySet().stream().filter(e->symTableValues.contains(e.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private HashMap<Integer, Integer> cleanHeap(Set<Integer> references, IHeap heap) {
+        return (HashMap<Integer, Integer>) heap.getDictionary().entrySet().stream().filter(
+                heapElement -> references.contains(heapElement.getKey())
+        ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private void garbageCollector(List<ProgramState> programs) {
+        Set<Integer> merged = new HashSet<>();
+        IDictionary<String,Integer> currentSymTable;
+
+        for(ProgramState prg : programs) {
+            currentSymTable = prg.getSymTable();
+            for(HashMap.Entry<String,Integer> entry : currentSymTable.getDictionary().entrySet()) {
+                merged.add(entry.getValue());
+            }
+        }
+
+        for(ProgramState prg : programs) {
+            prg.getHeap().setDictionary(this.cleanHeap(merged, prg.getHeap()));
+        }
     }
 
     private void closeOpenedFiles(ProgramState state) throws IOException, UndefinedOperationException, UndefinedVariableException, DivisionByZeroException, HeapReadingException {
@@ -77,10 +97,7 @@ public class Controller {
         List<ProgramState> prgList = this.removeCompletedPrg(this.repository.getPrgList());
         Map<Integer, Integer> commonHeap = prgList.get(0).getHeap().getDictionary();
         while(prgList.size() > 0) {
-            for(ProgramState prg : prgList) {
-                Collection<Integer> symTable = prg.getSymTable().values();
-                this.garbageCollector(symTable, commonHeap);
-            }
+            this.garbageCollector(prgList);
             this.oneStepForAllPrg(prgList);
             prgList = removeCompletedPrg(this.repository.getPrgList());
         }
@@ -96,7 +113,6 @@ public class Controller {
     public void addProgram(ProgramState prg) {
         this.repository.add(prg);
     }
-
 
     private void setFlag(String value) {
         this.flag = value;
