@@ -54,12 +54,6 @@ public class Controller {
     }
 
     private void oneStepForAllPrg(List<ProgramState> prgList) throws IOException, InterruptedException{
-        if (this.flag.equals("on")) {
-            for(ProgramState state : prgList) {
-                this.repository.logPrgStateExec(state);
-                System.out.println(state.toString());
-            }
-        }
         List<Callable<ProgramState>> callList = prgList.stream().map((ProgramState p)->(Callable<ProgramState>)(p::oneStep)).collect(Collectors.toList());
         List<ProgramState> newPrgList = this.executor.invokeAll(callList).stream()
                 .map(future -> {
