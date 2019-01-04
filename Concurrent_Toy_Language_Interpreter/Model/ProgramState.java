@@ -75,7 +75,7 @@ public class ProgramState {
     public String toString() {
         String result = "";
         result = result + "PROGRAM ID: " + this.id + "\n";
-        result = result + "EXECUTION STACK" + "\n" + result + "---------------" + "\n" + this.getExeStack().toString() + "\n";
+        result = result + "EXECUTION STACK" + "\n" + "---------------" + "\n" + this.getExeStack().toString() + "\n";
         result = result + "SYMBOL TABLE" + "\n" + "------------" + "\n" + this.getSymTable().toString() + "\n";
         result = result + "OUT" + "\n" + "---" + "\n" + this.getOut().toString() + "\n";
         result = result + "FILE TABLE" + "\n" + "----------" + "\n" + this.getFileTable().toString() + "\n";
