@@ -15,9 +15,7 @@ public class RunExample extends Command {
 
     @Override
     public void execute() {
-        int prg_num = 1;
         while(!this.controller.isEmpty()) {
-            System.out.println("PROGRAM NUMBER: " + Integer.toString(prg_num));
             try {
                 this.controller.allStep();
             } catch (NullPointerException ex7) {
@@ -33,7 +31,6 @@ public class RunExample extends Command {
             } catch (HeapReadingException ex7) {
                 System.out.println(ex7.getMessage());
             }
-            prg_num++;
         }
     }
 }
