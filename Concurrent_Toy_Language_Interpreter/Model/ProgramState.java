@@ -2,6 +2,8 @@ package Model;
 
 import ADTs.*;
 import Exceptions.*;
+import GUI.FileTableEntry;
+import GUI.SymTableEntry;
 import Heap.IHeap;
 import Model.Statements.IStatement;
 
@@ -9,6 +11,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import ADTs.MyTuple;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.TableView;
 
 public class ProgramState {
     private IStack<IStatement> exeStack;
@@ -73,8 +78,7 @@ public class ProgramState {
     }
 
     public String toString() {
-        String result = "";
-        result = result + "PROGRAM ID: " + this.id + "\n";
+        String result = "PROGRAM ID: " + this.id + "\n";
         result = result + "EXECUTION STACK" + "\n" + "---------------" + "\n" + this.getExeStack().toString() + "\n";
         result = result + "SYMBOL TABLE" + "\n" + "------------" + "\n" + this.getSymTable().toString() + "\n";
         result = result + "OUT" + "\n" + "---" + "\n" + this.getOut().toString() + "\n";
@@ -82,5 +86,31 @@ public class ProgramState {
         result = result + "HEAP" + "\n" + "----" + "\n" + this.getHeap().toString() + "\n";
         result = result + "\n";
         return result;
+    }
+
+    public ObservableList<FileTableEntry> observableListFileTable() {
+        ObservableList<FileTableEntry> heap = FXCollections.observableArrayList();
+        for(Integer key : fileTable.getDictionary().keySet()) {
+            heap.add(new FileTableEntry(key, fileTable.get(key).toString()));
+        }
+        return heap;
+    }
+
+    public void updateFIleTable(TableView<FileTableEntry> heap){
+        heap.getItems().clear();
+        heap.setItems(this.observableListFileTable());
+    }
+
+    public void symTableUpdate(TableView<SymTableEntry> heap){
+        heap.getItems().clear();
+        heap.setItems(this.observableListSymTable());
+    }
+
+    public ObservableList<SymTableEntry> observableListSymTable() {
+        ObservableList<SymTableEntry> heap = FXCollections.observableArrayList();
+        for(String key : symTable.getDictionary().keySet()) {
+            heap.add(new SymTableEntry(key, symTable.get(key)));
+        }
+        return heap;
     }
 }
