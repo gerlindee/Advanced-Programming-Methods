@@ -31,4 +31,6 @@
                                      .filter(p -> {return (p%2==0 || p%3==0);})
                                      .map(p -> "A" + (p=p+1).toString() + "B")
                                      .collect(Collectors.toList());
-        
+                                     
+ 3. What is a Cyclic Barrier in Java?
+    A Cyclic Barrier is a synchronization mechanism used for thread synchronization. Threads wait for one another to reach a common execution point, called a „barrier”, before resuming execution. Threads wait for eachother by calling the await() method. Once a given number N of threads reach the common execution point, all threads resume execution.
