@@ -52,15 +52,14 @@ public class GUI extends Application {
     private TableView<HeapEntry> heap; // same as for symTable
     private ListView<Integer> out;
     private TableView<FileTableEntry> fileTable; // same as for symTable
-    private ListView<Integer> prgId;
-    private TableView<FileTableEntry> symTable; // use this new class rather than MyTuple<stuff> (like in ProgramState) because it's easier to deal with the TableColumns settings
+    private TableView<SymTableEntry> symTable; // use this new class rather than MyTuple<stuff> (like in ProgramState) because it's easier to deal with the TableColumns settings
     private ListView<String> stack;
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         this.primaryStage = new Stage();
         this.primaryStage.setTitle("Toy Language");
 
@@ -103,17 +102,17 @@ public class GUI extends Application {
         this.out.setMinWidth(235);
 
         // create table columns for the symbol table + the table
-        TableColumn<FileTableEntry, Integer> symTableKey = new TableColumn<>("Value"); // descriptor
+        TableColumn<SymTableEntry, Integer> symTableKey = new TableColumn<>("Key");
         symTableKey.setCellValueFactory(new PropertyValueFactory<>("Key"));
         symTableKey.setMinWidth(127);
 
-        TableColumn<FileTableEntry, Integer> symTableValue = new TableColumn<>("Key"); // file
+        TableColumn<SymTableEntry, Integer> symTableValue = new TableColumn<>("Value"); // file
         symTableValue.setCellValueFactory(new PropertyValueFactory<>("Value"));
         symTableValue.setMinWidth(127);
 
         this.symTable = new TableView<>();
-        this.symTable.getColumns().add(symTableValue);
         this.symTable.getColumns().add(symTableKey);
+        this.symTable.getColumns().add(symTableValue);
 
         // create table columns + table for the file table
         TableColumn<FileTableEntry, Integer> tableViewKey = new TableColumn<>("Descriptor");
@@ -146,17 +145,21 @@ public class GUI extends Application {
         l1.getChildren().addAll(this.fileTable, this.heap);
         l1.setSpacing(5);
 
-        VBox l2 = new VBox();
+        HBox l2 = new HBox();
         l2.getChildren().addAll(l1, this.symTable, this.out);
         l2.setSpacing(5);
 
+        VBox l4 = new VBox();
+        l4.getChildren().addAll(l1,l2);
+        l4.setSpacing(5);
+
         HBox l3 = new HBox();
-        l3.getChildren().addAll(this.stack, l2);
+        l3.getChildren().addAll(this.stack, l4);
         l3.setSpacing(5);
         l3.setPadding(new Insets(5, 0, 5,0));
         layoutProgram.setCenter(l3);
 
-        this.ProgramsScene = new Scene(layoutProgram, 600, 600);
+        this.ProgramsScene = new Scene(layoutProgram, 800, 600);
         this.MenuScene = new Scene(menuLayout, 1000, 600);
 
         this.primaryStage.setTitle("Toy Language");
@@ -249,11 +252,9 @@ public class GUI extends Application {
     private void threadListUpdateListener() { // aka what happens when we select another thread
         this.thread_choice_box.getSelectionModel().selectedIndexProperty().addListener(
                 (selection, old_value, new_value) -> {
-                    // if error, try-catch IndexOutOfBoundsException here
                     this.thread_text.setText(this.programs.get(new_value.intValue()).getId() + "");
                     this.programs.get(new_value.intValue()).getExeStack().update(this.stack); // we replace what's being displayed currently in the stack list view with the new stack, hence why we give ListView<String> stack as parameter
                     this.programs.get(new_value.intValue()).symTableUpdate(symTable);
-                    // catch here
                 }
         );
     }
@@ -304,31 +305,10 @@ public class GUI extends Application {
     }
 
     private void initPrograms() {
-        // program_1 : v = 2; Print(v)
+
+        // program_1 : a = 2+3*5; b = a+1; Print(b)
 
         ConstantExpression const1 = new ConstantExpression(2);
-        AssignStatement assign1 = new AssignStatement("v", const1);
-        VarExpression var1 = new VarExpression("v");
-        PrintStatement print1 = new PrintStatement(var1);
-        CompStatement statement1 = new CompStatement(assign1, print1);
-
-        MyStack<IStatement> stack1 = new MyStack<>();
-        MyDictionary<String, Integer> symTable1 = new MyDictionary<>();
-        MyList<Integer> out1 = new MyList<>();
-        MyDictionary<Integer, MyTuple<String, BufferedReader>> file1 = new MyDictionary<>();
-        Heap heap1 = new Heap();
-
-        ProgramState prg1 = new ProgramState(stack1,symTable1,out1,statement1,file1, heap1, 1);
-
-        Repository repo1 = new Repository("logfile1.txt");
-        Controller ctrl1 = new Controller(repo1, "off");
-        ctrl1.addProgram(prg1);
-
-        this.statements.addFirst(statement1);
-        this.controllers.addFirst(ctrl1);
-
-        // program_2 : a = 2+3*5; b = a+1; Print(b)
-
         ConstantExpression const2 = new ConstantExpression(3);
         ConstantExpression const3 = new ConstantExpression(5);
         ConstantExpression const4 = new ConstantExpression(1);
@@ -355,15 +335,15 @@ public class GUI extends Application {
         Controller ctrl2 = new Controller(repo2, "on");
         ctrl2.addProgram(prg2);
 
-        this.statements.addFirst(comp3);
-        this.controllers.addFirst(ctrl2);
-
-        // program_3 : a = 2 - 2; (IF a THEN v = 2 ELSE v = 3); Print(v)
+        // program_2 : a = 2 - 2; (IF a THEN v = 2 ELSE v = 3); Print(v)
 
         ArithmetricExpression arith4 = new ArithmetricExpression(const1, const1, "-");
         AssignStatement assign3 = new AssignStatement("a", arith4);
         AssignStatement assign4 = new AssignStatement("v", const2);
+        AssignStatement assign1 = new AssignStatement("v", const1);
         IfStatement ifstmt1 = new IfStatement(var2,assign1,assign4);
+        VarExpression var1 = new VarExpression("v");
+        PrintStatement print1 = new PrintStatement(var1);
         CompStatement comp4 = new CompStatement(ifstmt1, print1);
         CompStatement comp5 = new CompStatement(assign3, comp4);
 
@@ -378,10 +358,8 @@ public class GUI extends Application {
         Repository repo3 = new Repository("logfile3.txt");
         Controller ctrl3 = new Controller(repo3, "on");
         ctrl3.addProgram(prg3);
-        this.statements.addFirst(comp5);
-        this.controllers.addFirst(ctrl3);
 
-        // program_4: open(var_f, "test_in"); open(var_b, "logfile1.txt"); read(var_f,var_c); Print(var_c); (if var_c then read(var_f,var_c); Print(var_c) else Print(0)); close(var_f)
+        // program_3: open(var_f, "test_in"); open(var_b, "logfile1.txt"); read(var_f,var_c); Print(var_c); (if var_c then read(var_f,var_c); Print(var_c) else Print(0)); close(var_f)
 
         VarExpression var4 = new VarExpression("var_f");
         ReadFile read1 = new ReadFile(var4, "var_c");
@@ -412,71 +390,11 @@ public class GUI extends Application {
         Repository repo4 = new Repository("logfile4.txt");
         Controller ctrl4 = new Controller(repo4, "on");
         ctrl4.addProgram(prg4);
-        this.statements.addFirst(comp21);
-        this.controllers.addFirst(ctrl4);
 
-        // program_5: open(var_f,"test.in"); readFile(var_f+2,var_c); Print(var_c); (if var_c then read(var_f,var_c); Print(var_c) else print(0)); close(var_f);
-
-        VarExpression var6 = new VarExpression("var_f");
-        ReadFile read3 = new ReadFile(var6, "var_c");
-        VarExpression var7 = new VarExpression("var_c");
-        PrintStatement print5 = new PrintStatement(var7);
-        CompStatement comp11 = new CompStatement(read3, print5);
-        ConstantExpression const6 = new ConstantExpression(0);
-        PrintStatement print6 = new PrintStatement(const6);
-        IfStatement if2 = new IfStatement(var7, comp11, print6);
-        CloseRFile close2 = new CloseRFile(var6);
-        CompStatement comp12 = new CompStatement(if2, close2);
-        CompStatement comp13 = new CompStatement(print5, comp12);
-        ArithmetricExpression var8 = new ArithmetricExpression(var6, new ConstantExpression(2), "+");
-        ReadFile read4 = new ReadFile(var8, "var_c");
-        CompStatement comp14 = new CompStatement(read4, comp13);
-        OpenRFile open2 = new OpenRFile("var_f", "test.in");
-        CompStatement comp15 = new CompStatement(open2, comp14);
-
-        MyStack<IStatement> stack5 = new MyStack<>();
-        MyDictionary<String, Integer> symTable5 = new MyDictionary<>();
-        MyList<Integer> out5 = new MyList<>();
-        MyDictionary<Integer, MyTuple<String, BufferedReader>> file5 = new MyDictionary<>();
-        Heap heap5 = new Heap();
-
-        ProgramState prg5 = new ProgramState(stack5, symTable5, out5, comp15, file5, heap5, 1);
-
-        Repository repo5 = new Repository("logfile5.txt");
-        Controller ctrl5 = new Controller(repo5, "on");
-        ctrl5.addProgram(prg5);
-        this.statements.addFirst(comp15);
-        this.controllers.addFirst(ctrl5);
-
-        // program_6: v = 10; new(v, 20); new(a, 22); print(v);
-
-        VarExpression varExpression = new VarExpression("v");
-        ConstantExpression constantExpression = new ConstantExpression(20);
-        AssignStatement assignStatement = new AssignStatement("v", new ConstantExpression(10));
-        NewStatement newStatement1 = new NewStatement("v", constantExpression);
-        NewStatement newStatement = new NewStatement("a",new ConstantExpression(22));
-        PrintStatement printStatement = new PrintStatement(varExpression);
-        CompStatement compStatement = new CompStatement(newStatement, printStatement);
-        CompStatement compStatement1 = new CompStatement(newStatement1, compStatement);
-        CompStatement compStatement2 = new CompStatement(assignStatement, compStatement1);
-
-        MyStack<IStatement> stack6 = new MyStack<>();
-        MyDictionary<String, Integer> symTable6 = new MyDictionary<>();
-        MyList<Integer> out6 = new MyList<>();
-        MyDictionary<Integer, MyTuple<String, BufferedReader>> file6 = new MyDictionary<>();
-        Heap heap6 = new Heap();
-
-        ProgramState prg6 = new ProgramState(stack6, symTable6, out6, compStatement2, file6, heap6,1);
-
-        Repository repo6 = new Repository("logfile6.txt");
-        Controller ctrl6 = new Controller(repo6, "on");
-        ctrl6.addProgram(prg6);
-        this.statements.addFirst(compStatement2);
-        this.controllers.addFirst(ctrl6);
-
-        // program_7: v = 10; new(v,20); print(100+rh(v)); print(100+rh(a));
+        // program_4: v = 10; new(v,20); print(100+rh(v)); print(100+rh(a));
 
         AssignStatement assignStatement1 = new AssignStatement("v", new ConstantExpression(10));
+        ConstantExpression constantExpression = new ConstantExpression(20);
         NewStatement newStatement2 = new NewStatement("v", constantExpression);
         NewStatement newStatement3 = new NewStatement("a",new ConstantExpression(22));
         HeapReadingExpression heapReadingExpression = new HeapReadingExpression("v");
@@ -501,10 +419,8 @@ public class GUI extends Application {
         Repository repo7 = new Repository("logfile7.txt");
         Controller ctrl7 = new Controller(repo7, "on");
         ctrl7.addProgram(prg7);
-        this.statements.addFirst(compStatement6);
-        this.controllers.addFirst(ctrl7);
 
-        // program_8: v = 10; new(v,20); new(a,22); wH(a,30); print(a); print(rh(a)); a = 0;
+        // program_5: v = 10; new(v,20); new(a,22); wH(a,30); print(a); print(rh(a)); a = 0;
 
         VarExpression varExpression1 = new VarExpression("a");
         AssignStatement assignStatement2 = new AssignStatement("v", new ConstantExpression(10));
@@ -522,7 +438,6 @@ public class GUI extends Application {
         CompStatement compStatement11 = new CompStatement(newStatement4, compStatement10);
         CompStatement compStatement12 = new CompStatement(assignStatement2, compStatement11);
 
-
         MyStack<IStatement> stack8 = new MyStack<>();
         MyDictionary<String, Integer> symTable8 = new MyDictionary<>();
         MyList<Integer> out8 = new MyList<>();
@@ -534,65 +449,8 @@ public class GUI extends Application {
         Repository repo8 = new Repository("logfile8.txt");
         Controller ctrl8 = new Controller(repo8, "on");
         ctrl8.addProgram(prg8);
-        this.statements.addFirst(compStatement12);
-        this.controllers.addFirst(ctrl8);
 
-        // program_9 : v = (10 + (2 < 6));
-
-        BooleanExpression booleanExpression = new BooleanExpression(new ConstantExpression(2),"<", new ConstantExpression(6));
-        ArithmetricExpression arithmetricExpression2 = new ArithmetricExpression(new ConstantExpression(10), booleanExpression, "+");
-        AssignStatement assignStatement4 =  new AssignStatement("v", arithmetricExpression2);
-
-        MyStack<IStatement> stack9 = new MyStack<>();
-        MyDictionary<String, Integer> symTable9 = new MyDictionary<>();
-        MyList<Integer> out9 = new MyList<>();
-        MyDictionary<Integer, MyTuple<String, BufferedReader>> file9 = new MyDictionary<>();
-        Heap heap9 = new Heap();
-
-        ProgramState prg9 = new ProgramState(stack9, symTable9, out9, assignStatement4, file9, heap9, 1);
-
-        Repository repo9 = new Repository("logfile9.txt");
-        Controller ctrl9 = new Controller(repo9, "on");
-        ctrl9.addProgram(prg9);
-        this.statements.addFirst(assignStatement4);
-        this.controllers.addFirst(ctrl9);
-
-        // program_10 : v = 15 + (16 <= 12); Print(v); new(v,(14 > 13)); Print(v); new(a,(14==14)); writeHeap(a,(12!=12)); Print(a)
-
-        BooleanExpression booleanExpression1 = new BooleanExpression(new ConstantExpression(16), "<=", new ConstantExpression(12));
-        ArithmetricExpression arithmetricExpression3 = new ArithmetricExpression(new ConstantExpression(15), booleanExpression1, "+");
-        AssignStatement assignStatement5 = new AssignStatement("v", arithmetricExpression3);
-        PrintStatement printStatement5 = new PrintStatement(new VarExpression("v"));
-        BooleanExpression booleanExpression2 = new BooleanExpression(new ConstantExpression(14), ">", new ConstantExpression(13));
-        NewStatement newStatement6 = new NewStatement("v", booleanExpression2);
-        PrintStatement printStatement6 = new PrintStatement(new VarExpression("v"));
-        BooleanExpression booleanExpression3 = new BooleanExpression(new ConstantExpression(14), "==", new ConstantExpression(14));
-        NewStatement newStatement7 = new NewStatement("a", booleanExpression3);
-        BooleanExpression booleanExpression4 = new BooleanExpression(new ConstantExpression(12), "!=", new ConstantExpression(12));
-        HeapWritingStatement heapWritingStatement1 = new HeapWritingStatement("a", booleanExpression4);
-        PrintStatement printStatement7 = new PrintStatement(new VarExpression("a"));
-        CompStatement compStatement13 = new CompStatement(heapWritingStatement1, printStatement7);
-        CompStatement compStatement14 = new CompStatement(newStatement7, compStatement13);
-        CompStatement compStatement15 = new CompStatement(printStatement6, compStatement14);
-        CompStatement compStatement16 = new CompStatement(newStatement6, compStatement15);
-        CompStatement compStatement17 = new CompStatement(printStatement5, compStatement16);
-        CompStatement compStatement18 = new CompStatement(assignStatement5, compStatement17);
-
-        MyStack<IStatement> stack10 = new MyStack<>();
-        MyDictionary<String, Integer> symTable10 = new MyDictionary<>();
-        MyList<Integer> out10 = new MyList<>();
-        MyDictionary<Integer, MyTuple<String, BufferedReader>> file10 = new MyDictionary<>();
-        Heap heap10 = new Heap();
-
-        ProgramState prg10 = new ProgramState(stack10, symTable10, out10, compStatement18, file10, heap10, 1);
-
-        Repository repo10 = new Repository("logfile10.txt");
-        Controller ctrl10 = new Controller(repo10, "on");
-        ctrl10.addProgram(prg10);
-        this.statements.addFirst(compStatement18);
-        this.controllers.addFirst(ctrl10);
-
-        // program_11 : a = 3; b = 5; while(a<=b) { Print(a); a = a + 1; }
+        // program_6 : a = 3; b = 5; while(a<=b) { Print(a); a = a + 1; }
 
         AssignStatement assignStatement6 = new AssignStatement("a", new ConstantExpression(3));
         AssignStatement assignStatement7 = new AssignStatement("b", new ConstantExpression(5));
@@ -616,9 +474,6 @@ public class GUI extends Application {
         Repository repo11 = new Repository("logfile11.txt");
         Controller ctrl11 = new Controller(repo11, "on");
         ctrl11.addProgram(prg11);
-
-        this.statements.addFirst(compStatement21);
-        this.controllers.addFirst(ctrl11);
 
         IStatement stmt = new CompStatement(
                 new AssignStatement("v", new ConstantExpression(10)),
@@ -658,6 +513,24 @@ public class GUI extends Application {
 
         this.statements.addFirst(stmt);
         this.controllers.addFirst(ctrl);
+
+        this.statements.addFirst(compStatement21);
+        this.controllers.addFirst(ctrl11);
+
+        this.statements.addFirst(compStatement6);
+        this.controllers.addFirst(ctrl7);
+
+        this.statements.addFirst(compStatement12);
+        this.controllers.addFirst(ctrl8);
+
+        this.statements.addFirst(comp21);
+        this.controllers.addFirst(ctrl4);
+
+        this.statements.addFirst(comp5);
+        this.controllers.addFirst(ctrl3);
+
+        this.statements.addFirst(comp3);
+        this.controllers.addFirst(ctrl2);
 
     }
 }
